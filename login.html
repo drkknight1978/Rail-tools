@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Railway Engineering Utilities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #e8d5b5;
+        }
+
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            background: linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 100%);
+            border: 2px solid #6b5539;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #8b4513 0%, #b8860b 50%, #8b4513 100%);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #6b5539;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            font-variant: small-caps;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #b8945f;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .rivets-container {
+            text-align: center;
+            margin: 15px 0 0 0;
+        }
+
+        .rivet {
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #5a5a5a 0%, #2a2a2a 100%);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            margin: 0 8px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #c9b896;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #2a2a2a;
+            border: 2px solid #6b5539;
+            border-radius: 4px;
+            color: #e8d5b5;
+            font-size: 16px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #b8860b;
+            background: #333;
+            box-shadow: 0 0 10px rgba(184, 134, 11, 0.2);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(145deg, #8b6f47 0%, #6b5539 100%);
+            color: #f5e6d3;
+            border: 1px solid #5a4632;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .login-button:hover {
+            background: linear-gradient(145deg, #b8860b 0%, #8b6f47 100%);
+            box-shadow: 0 4px 12px rgba(184, 134, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: rgba(139, 69, 19, 0.3);
+            border: 1px solid #8b4513;
+            color: #ffcccc;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-text {
+            text-align: center;
+            font-size: 12px;
+            color: #8b7355;
+            font-style: italic;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #4a4a4a;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .login-container {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Railway Utilities</h1>
+            <p class="subtitle">Authentication Required</p>
+            <div class="rivets-container">
+                <span class="rivet"></span>
+                <span class="rivet"></span>
+                <span class="rivet"></span>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Invalid password. Please try again.
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">Enter Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="login-button">
+                Access Utilities
+            </button>
+        </form>
+
+        <p class="info-text">
+            Authorized personnel only
+        </p>
+    </div>
+
+    <script>
+        /**
+         * Railway Engineering Utilities - Authentication System
+         *
+         * This login page provides password-based authentication for the app suite.
+         *
+         * SECURITY NOTICE:
+         * - This is CLIENT-SIDE authentication only
+         * - Suitable for basic access control, NOT for protecting sensitive data
+         * - Determined users can bypass by manipulating localStorage
+         * - For production apps with sensitive data, use SERVER-SIDE authentication
+         *
+         * HOW IT WORKS:
+         * 1. User enters password
+         * 2. Password is hashed using SHA-256 (Web Crypto API)
+         * 3. Hash is compared against pre-stored valid hashes
+         * 4. If match: Create session in localStorage with 24-hour expiry
+         * 5. Redirect to intended page (or index.html)
+         * 6. Session checked by auth.js on protected pages
+         *
+         * TO CHANGE PASSWORD:
+         * 1. Run in browser console: await hashPassword('your_new_password')
+         * 2. Copy the hash output
+         * 3. Add to validPasswords array below (line 277)
+         * 4. Remove old hash if replacing default password
+         *
+         * See AUTH_README.md for detailed instructions
+         */
+
+        // ============================================================================
+        // CONFIGURATION
+        // ============================================================================
+
+        const AUTH_CONFIG = {
+            sessionKey: 'railwayAuthSession',    // localStorage key for session data
+            sessionDuration: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+        };
+
+        // ============================================================================
+        // PASSWORD HASHING
+        // ============================================================================
+
+        /**
+         * Hash a password using SHA-256
+         * Uses Web Crypto API for secure hashing
+         *
+         * @param {string} password - The plaintext password to hash
+         * @returns {Promise<string>} - Hex string of the SHA-256 hash
+         *
+         * Example usage in browser console:
+         *   await hashPassword('myPassword123')
+         *   // Returns: '1a2b3c4d5e6f...' (64-character hex string)
+         */
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // ============================================================================
+        // SESSION MANAGEMENT
+        // ============================================================================
+
+        /**
+         * Check if user already has a valid session
+         * If yes, redirect them to the app (they don't need to login again)
+         * If session expired or invalid, clean it up
+         *
+         * @returns {boolean} - true if valid session exists, false otherwise
+         */
+        function checkExistingSession() {
+            const session = localStorage.getItem(AUTH_CONFIG.sessionKey);
+            if (session) {
+                try {
+                    const sessionData = JSON.parse(session);
+                    const now = new Date().getTime();
+
+                    // Check if session is still valid (not expired)
+                    if (sessionData.expiry && sessionData.expiry > now) {
+                        // Valid session exists - redirect to app
+                        // If they came from a specific page, redirect there
+                        // Otherwise, default to index.html
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirect = urlParams.get('redirect') || 'index.html';
+                        window.location.href = redirect;
+                        return true;
+                    } else {
+                        // Session expired - clean it up
+                        localStorage.removeItem(AUTH_CONFIG.sessionKey);
+                    }
+                } catch (e) {
+                    // Invalid session data - clean it up
+                    localStorage.removeItem(AUTH_CONFIG.sessionKey);
+                }
+            }
+            return false;
+        }
+
+        // ============================================================================
+        // LOGIN FORM HANDLER
+        // ============================================================================
+
+        /**
+         * Handle login form submission
+         * Validates password and creates session if valid
+         */
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent form submission
+
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Hash the entered password using SHA-256
+            const hashedPassword = await hashPassword(password);
+
+            // ========================================================================
+            // PASSWORD CONFIGURATION
+            // ========================================================================
+            // SECURITY: Only SHA-256 hashes are stored here, NOT plaintext passwords
+            //
+            // DEFAULT PASSWORD: railway123
+            // DEFAULT HASH:     7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb
+            //
+            // TO GENERATE NEW HASH:
+            //   Method 1 (Browser console):
+            //     await hashPassword('your_password')
+            //
+            //   Method 2 (Command line):
+            //     echo -n "your_password" | sha256sum | cut -d' ' -f1
+            //
+            // MULTIPLE PASSWORDS:
+            //   Add multiple hashes to support different users:
+            //   const validPasswords = [
+            //       'hash_for_admin',
+            //       'hash_for_user1',
+            //       'hash_for_user2'
+            //   ];
+            // ========================================================================
+
+            const validPasswords = [
+                '7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb', // Default: railway123
+                // Add more SHA-256 hashes below as needed (one per line)
+            ];
+
+            // Check if entered password hash matches any valid hash
+            if (validPasswords.includes(hashedPassword)) {
+                // ✅ Password is valid - Create session
+
+                const sessionData = {
+                    authenticated: true,                                        // Authentication flag
+                    timestamp: new Date().getTime(),                           // Login timestamp
+                    expiry: new Date().getTime() + AUTH_CONFIG.sessionDuration // Session expiry time
+                };
+
+                // Store session in localStorage (accessible across all tabs/windows)
+                localStorage.setItem(AUTH_CONFIG.sessionKey, JSON.stringify(sessionData));
+
+                // Redirect to the page they were trying to access
+                // URL format: login.html?redirect=pdf-stamper.html
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect') || 'index.html';
+                window.location.href = redirect;
+
+            } else {
+                // ❌ Password is invalid - Show error
+
+                errorMessage.classList.add('show');           // Display error message
+                document.getElementById('password').value = ''; // Clear password field
+                document.getElementById('password').focus();   // Focus back to input
+
+                // Auto-hide error message after 3 seconds
+                setTimeout(() => {
+                    errorMessage.classList.remove('show');
+                }, 3000);
+            }
+        });
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+
+        // On page load: Check if user already has valid session
+        // If yes, they'll be auto-redirected (no need to login again)
+        checkExistingSession();
+    </script>
+</body>
+</html>

@@ -298,16 +298,65 @@
             margin-top: 5px;
         }
 
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn, .logout-btn {
+            padding: 8px 16px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover, .logout-btn:hover {
+            background: #545b62;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
+
+            .header-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .back-btn, .logout-btn {
+                width: 100%;
+            }
         }
     </style>
+    <!-- Authentication Script - MUST be loaded first -->
+    <script src="auth.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>PDF Stamper Web App</h1>
+        <div class="header-controls">
+            <h1 style="margin-bottom: 0;">PDF Stamper Web App</h1>
+            <div style="display: flex; gap: 10px;">
+                <a href="index.html" class="back-btn">← Back to Home</a>
+                <button class="logout-btn" onclick="RailwayAuth.logout()">Logout</button>
+            </div>
+        </div>
         
         <!-- File Selection -->
         <div class="section">
