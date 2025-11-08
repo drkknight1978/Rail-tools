@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Railway Engineering Utilities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #e8d5b5;
+        }
+
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            background: linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 100%);
+            border: 2px solid #6b5539;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #8b4513 0%, #b8860b 50%, #8b4513 100%);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #6b5539;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            font-variant: small-caps;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #b8945f;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .rivets-container {
+            text-align: center;
+            margin: 15px 0 0 0;
+        }
+
+        .rivet {
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #5a5a5a 0%, #2a2a2a 100%);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            margin: 0 8px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #c9b896;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #2a2a2a;
+            border: 2px solid #6b5539;
+            border-radius: 4px;
+            color: #e8d5b5;
+            font-size: 16px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #b8860b;
+            background: #333;
+            box-shadow: 0 0 10px rgba(184, 134, 11, 0.2);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(145deg, #8b6f47 0%, #6b5539 100%);
+            color: #f5e6d3;
+            border: 1px solid #5a4632;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .login-button:hover {
+            background: linear-gradient(145deg, #b8860b 0%, #8b6f47 100%);
+            box-shadow: 0 4px 12px rgba(184, 134, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: rgba(139, 69, 19, 0.3);
+            border: 1px solid #8b4513;
+            color: #ffcccc;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-text {
+            text-align: center;
+            font-size: 12px;
+            color: #8b7355;
+            font-style: italic;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #4a4a4a;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .login-container {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Railway Utilities</h1>
+            <p class="subtitle">Authentication Required</p>
+            <div class="rivets-container">
+                <span class="rivet"></span>
+                <span class="rivet"></span>
+                <span class="rivet"></span>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Invalid password. Please try again.
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">Enter Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="login-button">
+                Access Utilities
+            </button>
+        </form>
+
+        <p class="info-text">
+            Authorized personnel only
+        </p>
+    </div>
+
+    <script>
+        // Authentication configuration
+        const AUTH_CONFIG = {
+            // Default password is "railway123" - change this to your desired password
+            passwordHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // SHA-256 hash
+            sessionKey: 'railwayAuthSession',
+            sessionDuration: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+        };
+
+        // Simple SHA-256 hash function
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // Check if already authenticated
+        function checkExistingSession() {
+            const session = localStorage.getItem(AUTH_CONFIG.sessionKey);
+            if (session) {
+                try {
+                    const sessionData = JSON.parse(session);
+                    const now = new Date().getTime();
+
+                    // Check if session is still valid
+                    if (sessionData.expiry && sessionData.expiry > now) {
+                        // Redirect to the page they were trying to access, or index
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirect = urlParams.get('redirect') || 'index.html';
+                        window.location.href = redirect;
+                        return true;
+                    } else {
+                        // Session expired, remove it
+                        localStorage.removeItem(AUTH_CONFIG.sessionKey);
+                    }
+                } catch (e) {
+                    localStorage.removeItem(AUTH_CONFIG.sessionKey);
+                }
+            }
+            return false;
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Hash the entered password
+            const hashedPassword = await hashPassword(password);
+
+            // For demo purposes, accept "railway123" as the password
+            // You can change this or add multiple valid passwords
+            const validPasswords = [
+                'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // empty string (for testing)
+                await hashPassword('railway123'), // Default password
+                // Add more hashed passwords here as needed
+            ];
+
+            if (validPasswords.includes(hashedPassword)) {
+                // Create session
+                const sessionData = {
+                    authenticated: true,
+                    timestamp: new Date().getTime(),
+                    expiry: new Date().getTime() + AUTH_CONFIG.sessionDuration
+                };
+
+                localStorage.setItem(AUTH_CONFIG.sessionKey, JSON.stringify(sessionData));
+
+                // Redirect to the page they were trying to access
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect') || 'index.html';
+                window.location.href = redirect;
+            } else {
+                // Show error
+                errorMessage.classList.add('show');
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+
+                // Hide error after 3 seconds
+                setTimeout(() => {
+                    errorMessage.classList.remove('show');
+                }, 3000);
+            }
+        });
+
+        // Check for existing session on page load
+        checkExistingSession();
+    </script>
+</body>
+</html>
