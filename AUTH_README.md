@@ -15,51 +15,73 @@ This repository now includes password-based authentication to protect access to 
 
 **IMPORTANT**: You should change this password before deploying to production!
 
-## How to Change the Password
+## Security Design
 
-### Method 1: Using Browser Console (Recommended)
+The password is **NOT** stored in cleartext in the code. Only the SHA-256 hash is stored. This means:
+- The actual password cannot be read from the source code
+- Users must know the correct password to authenticate
+- The password is hashed client-side before comparison
 
-1. Open your browser's developer console (F12)
-2. Run this command with your desired password:
-   ```javascript
-   (async () => {
-     const password = "your_new_password_here";
-     const encoder = new TextEncoder();
-     const data = encoder.encode(password);
-     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-     const hashArray = Array.from(new Uint8Array(hashBuffer));
-     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-     console.log('Password Hash:', hashHex);
-   })();
-   ```
-3. Copy the generated hash
-4. Open `login.html` in a text editor
-5. Find the line with `await hashPassword('railway123')`
-6. Replace it with: `'YOUR_HASH_HERE'` (paste the hash you copied)
+## How to Change/Add Passwords
 
-### Method 2: Direct Edit
+### Step 1: Generate the Password Hash
 
-1. Open `login.html`
-2. Find the section around line 91 that looks like:
+Open `login.html` in your browser, press F12 to open Developer Console, and run:
+
+```javascript
+(async () => {
+  const password = "your_new_password_here";
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  console.log('Password Hash:', hashHex);
+})();
+```
+
+Replace `"your_new_password_here"` with your desired password. Copy the hash that appears in the console.
+
+### Step 2: Add the Hash to login.html
+
+1. Open `login.html` in a text editor
+2. Find the `validPasswords` array (around line 279):
    ```javascript
    const validPasswords = [
-       'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-       await hashPassword('railway123'),
+       '7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb', // Default password
+       // Add more SHA-256 hashes here as needed
    ];
    ```
-3. Replace `'railway123'` with your desired password
+3. Either replace the existing hash or add your new hash to the array:
+   ```javascript
+   const validPasswords = [
+       'YOUR_NEW_HASH_HERE',  // Your password
+   ];
+   ```
+
+### Using Command Line (Alternative)
+
+You can also generate the hash using command line:
+
+```bash
+echo -n "your_password" | sha256sum | cut -d' ' -f1
+```
+
+Then add the resulting hash to the `validPasswords` array in `login.html`.
 
 ## Multiple Passwords
 
-You can support multiple valid passwords by adding more entries to the `validPasswords` array in `login.html`:
+You can support multiple valid passwords by adding more hashes to the `validPasswords` array in `login.html`:
 
 ```javascript
 const validPasswords = [
-    await hashPassword('railway123'),    // Default password
-    await hashPassword('admin_password'), // Admin password
-    await hashPassword('user_password'),  // User password
+    '7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb', // Password 1
+    'a3f8d7e2c9b1f5e8d4a6c2b9e1f3d8c5a7b4e9f2d6c3a8e5b1f7d9c4a2e6b8f3', // Password 2
+    // Add more hashes as needed
 ];
 ```
+
+**Important**: Never store plaintext passwords in the code! Always use pre-computed hashes.
 
 ## Session Duration
 
@@ -81,11 +103,16 @@ The default session duration is 24 hours. To change this:
 
 ## Security Notes
 
-1. This is a client-side authentication system suitable for basic access control
-2. For production use with sensitive data, implement server-side authentication
-3. Passwords are hashed using SHA-256 before comparison
-4. Sessions are stored in localStorage (cleared on logout or expiry)
-5. Change the default password immediately!
+1. **Client-Side Only**: This is a client-side authentication system suitable for basic access control
+2. **Not for Sensitive Data**: For production use with sensitive data, implement server-side authentication
+3. **No Cleartext Passwords**: Passwords are never stored in cleartext - only SHA-256 hashes are stored
+4. **Hashing**: User input is hashed client-side using SHA-256 before comparison
+5. **Session Storage**: Sessions are stored in localStorage (cleared on logout or expiry)
+6. **Change Default Password**: Replace the default password hash immediately!
+7. **Limitations**: As this is client-side only:
+   - Determined users can bypass authentication by manipulating localStorage
+   - This provides basic protection, not security against skilled attackers
+   - Use server-side authentication for real security requirements
 
 ## Testing
 

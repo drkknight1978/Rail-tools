@@ -221,8 +221,6 @@
     <script>
         // Authentication configuration
         const AUTH_CONFIG = {
-            // Default password is "railway123" - change this to your desired password
-            passwordHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // SHA-256 hash
             sessionKey: 'railwayAuthSession',
             sessionDuration: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
         };
@@ -273,12 +271,12 @@
             // Hash the entered password
             const hashedPassword = await hashPassword(password);
 
-            // For demo purposes, accept "railway123" as the password
-            // You can change this or add multiple valid passwords
+            // Valid password hashes (SHA-256)
+            // To add a password: Use browser console to run hashPassword('your_password')
+            // and add the resulting hash to this array
             const validPasswords = [
-                'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', // empty string (for testing)
-                await hashPassword('railway123'), // Default password
-                // Add more hashed passwords here as needed
+                '7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb', // Default password
+                // Add more SHA-256 hashes here as needed
             ];
 
             if (validPasswords.includes(hashedPassword)) {
