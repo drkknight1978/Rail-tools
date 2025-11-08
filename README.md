@@ -1,146 +1,295 @@
-# PDF Stamper Web App
+# Railway Engineering Utilities
 
-A client-side web application for adding stamps (images) to PDF documents. No server required - all processing happens in your browser!
+A collection of client-side web applications for engineering and document management tasks. All processing happens in your browser - no server required!
 
-## Features
+## 🔐 Authentication Required
 
-- **PDF Preview**: View and navigate through PDF pages with zoom controls
-- **Stamp Positioning**:
-  - Pre-defined positions (top-left, top-right, center, bottom-left, bottom-right)
-  - Custom positioning with drag-and-drop or coordinate input
-- **Stamp Customization**:
-  - Adjustable opacity (0-100%)
-  - Adjustable scale (10-200%)
-  - Real-time preview of changes
-- **Flexible Application**:
-  - Apply to current page only
-  - Apply to all pages
-  - Apply to specific page ranges (e.g., "1-3, 5, 7-9")
-- **Privacy-Focused**: All processing happens locally in your browser - files never leave your device
+**This application suite now requires password authentication to access all tools.**
 
-## Usage
+- **Login Page**: `login.html`
+- **Default Password**: `railway123`
+- **Session Duration**: 24 hours
 
-1. **Open the Application**
-   - Simply open `pdf-stamper.html` in a modern web browser
-   - No installation or setup required
+**⚠️ IMPORTANT**: Change the default password before deployment! See [AUTH_README.md](AUTH_README.md) for detailed instructions.
 
-2. **Load Files**
-   - Click "Browse..." next to "PDF File" to select your PDF
-   - Click "Browse..." next to "Stamp Image" to select your stamp image (PNG, JPG, etc.)
+## 📋 Available Tools
 
-3. **Position Your Stamp**
-   - Use the "Position Preset" dropdown for quick positioning
-   - Or drag the stamp directly on the preview
-   - Or enter custom X/Y coordinates
+### 1. PDF Stamper
+Add stamps and watermarks to PDF documents with precision control.
 
-4. **Customize Appearance**
-   - Adjust opacity slider for transparency
-   - Adjust scale slider to resize the stamp
-   - Use zoom controls to better view your work
+**Features**:
+- PDF preview with zoom controls
+- Drag-and-drop stamp positioning
+- Pre-defined position presets (corners, center)
+- Custom positioning with X/Y coordinates
+- Adjustable opacity (0-100%)
+- Adjustable scale (10-200%)
+- Apply to specific pages or page ranges
+- Real-time preview of changes
 
-5. **Apply & Download**
-   - Choose which pages to stamp (current, all, or specific range)
+### 2. Future Tools (Coming Soon)
+- Technical Drawings Converter
+- Rail Calculator
+- Data Converter
+
+## 🚀 Quick Start
+
+1. **Access the Application**
+   - Open `index.html` in a modern web browser
+   - You'll be redirected to the login page
+
+2. **Login**
+   - Enter password: `railway123` (change this!)
+   - You'll be authenticated for 24 hours
+
+3. **Select a Tool**
+   - Choose from available utilities on the home page
+   - Currently: PDF Stamper is available
+
+4. **Logout**
+   - Click the "Logout" button on any page to end your session
+
+## 📁 File Structure
+
+```
+├── index.html           # Gateway page with tool selection
+├── login.html          # Authentication page
+├── auth.js             # Shared authentication module
+├── pdf-stamper.html    # PDF stamping tool
+├── README.md           # This file
+├── AUTH_README.md      # Authentication setup guide
+└── .gitignore          # Git ignore rules
+```
+
+## 🔒 Security Features
+
+### Authentication System
+- **Password Protection**: All tools require login
+- **Session Management**: 24-hour sessions with automatic expiry
+- **SHA-256 Hashing**: Passwords are hashed before storage/comparison
+- **No Cleartext Storage**: Only password hashes stored in code
+- **Logout Functionality**: End session from any page
+
+### Privacy
+- **100% Client-Side**: All processing happens in your browser
+- **No Data Upload**: Your files never leave your device
+- **No Tracking**: No analytics or tracking code
+- **Local Storage Only**: Session data stored locally
+
+## ⚙️ Configuration
+
+### Changing the Password
+
+**See [AUTH_README.md](AUTH_README.md) for complete instructions.**
+
+Quick method:
+```bash
+# Generate password hash
+echo -n "your_new_password" | sha256sum | cut -d' ' -f1
+
+# Add the hash to login.html at line 280
+```
+
+### Session Duration
+
+Edit `login.html` line 225:
+```javascript
+sessionDuration: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+```
+
+Change to desired duration:
+- 1 hour: `1 * 60 * 60 * 1000`
+- 12 hours: `12 * 60 * 60 * 1000`
+- 7 days: `7 * 24 * 60 * 60 * 1000`
+
+## 🛠️ PDF Stamper Usage
+
+1. **Login** to access the tool
+2. **Load Files**:
+   - Select your PDF file
+   - Select your stamp image (PNG, JPG, etc.)
+3. **Position Your Stamp**:
+   - Use preset positions or drag to position
+   - Enter custom coordinates if needed
+4. **Customize**:
+   - Adjust opacity for transparency
+   - Adjust scale to resize
+   - Use zoom to preview better
+5. **Apply & Download**:
+   - Choose pages (current, all, or range like "1-3, 5, 7-9")
    - Click "Process & Download"
-   - Your stamped PDF will download automatically
+   - Stamped PDF downloads automatically
 
-## Technical Details
+## 💻 Technical Details
 
 ### Technologies Used
-
-- **PDF.js** (v3.11.174) - For rendering PDF previews
-- **pdf-lib** (v1.17.1) - For modifying PDF documents
-- **Vanilla JavaScript** - No frameworks needed
-- **HTML5 Canvas** - For real-time preview rendering
+- **PDF.js** (v3.11.174) - PDF rendering
+- **pdf-lib** (v1.17.1) - PDF modification
+- **Web Crypto API** - Password hashing (SHA-256)
+- **LocalStorage API** - Session management
+- **Vanilla JavaScript** - No frameworks
+- **HTML5 Canvas** - Preview rendering
 
 ### Browser Compatibility
 
-Works in all modern browsers that support:
-- ES6+ JavaScript
+**Minimum Requirements**:
+- ES6+ JavaScript support
 - HTML5 Canvas
 - FileReader API
 - Blob API
+- Web Crypto API (for authentication)
 
-Recommended browsers:
+**Recommended Browsers**:
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
 
-### File Structure
+### Authentication Flow
 
 ```
-pdf-stamper.html    # Complete standalone application
-README.md          # This file
-LICENSE            # License information
-.gitignore         # Git ignore rules
+User → index.html/pdf-stamper.html
+       ↓
+   auth.js checks session
+       ↓
+   No valid session?
+       ↓
+   Redirect to login.html
+       ↓
+   User enters password
+       ↓
+   Hash & validate
+       ↓
+   Create session (24h)
+       ↓
+   Redirect back to app
+       ↓
+   Access granted!
 ```
 
-## Privacy & Security
+## 🔧 Development
 
-- **100% Client-Side**: All processing happens in your browser
-- **No Data Upload**: Your files are never sent to any server
-- **No Tracking**: No analytics or tracking code
-- **Offline Capable**: Works without internet (except for initial CDN library loading)
+### No Build Process
+This is a collection of standalone HTML files requiring no build process.
 
-## Limitations
-
-- Large PDF files (>50MB) may be slow to process
-- Maximum image resolution depends on browser memory
-- Some PDF features (forms, signatures) may be affected by modification
-
-## Development
-
-This is a standalone HTML file with no build process. To modify:
-
-1. Open `pdf-stamper.html` in your text editor
+To modify:
+1. Open the relevant HTML file in your text editor
 2. Make changes to HTML/CSS/JavaScript
 3. Save and refresh in browser
-4. No compilation or build step needed
+4. No compilation needed
 
-## Contributing
+### Adding New Tools
+1. Create new HTML file (e.g., `new-tool.html`)
+2. Add authentication script:
+   ```html
+   <script src="auth.js"></script>
+   ```
+3. Add logout button to UI
+4. Update `index.html` to link to new tool
+
+### Testing Authentication
+1. Clear localStorage: `localStorage.clear()`
+2. Navigate to protected page → should redirect to login
+3. Login → should redirect back
+4. Check session persists on refresh
+5. Test logout functionality
+
+## ⚠️ Important Security Notes
+
+1. **Client-Side Only**: This authentication is client-side and provides basic access control
+2. **Not for Highly Sensitive Data**: For production apps with sensitive data, use server-side authentication
+3. **Can Be Bypassed**: Determined users can bypass by manipulating localStorage
+4. **Use Case**: Suitable for internal tools, light protection, deterring casual access
+5. **Server-Side Recommended**: For real security requirements, implement backend authentication
+
+## 🐛 Troubleshooting
+
+### Authentication Issues
+
+**Can't login with correct password**
+- Check browser console for errors
+- Verify password hash matches in `login.html` line 280
+- Clear localStorage and try again
+
+**Redirected to login repeatedly**
+- Check that `auth.js` is loading properly
+- Verify browser supports Web Crypto API
+- Check browser console for JavaScript errors
+
+**Session expires too quickly**
+- Check `sessionDuration` setting in `login.html`
+- Verify system clock is correct
+
+### PDF Stamper Issues
+
+**PDF won't load**
+- Ensure PDF is not password-protected
+- Check for file corruption
+- Try a different PDF
+
+**Stamp in wrong position**
+- Remember: coordinates are based on PDF dimensions, not screen pixels
+- Use preview to verify positioning
+- Y-axis starts from top in preview, bottom in PDF
+
+**Downloaded PDF corrupted**
+- Ensure both files loaded successfully (green checkmarks)
+- Try smaller/simpler PDF
+- Clear browser cache
+
+**Performance issues**
+- Resize stamp images before uploading
+- Process fewer pages at once
+- Close other browser tabs
+
+## 📝 Version History
+
+### v2.0 - Authentication Update
+- ✅ Added password-based authentication system
+- ✅ Created login page with Railway Engineering theme
+- ✅ Implemented session management (24-hour expiry)
+- ✅ Protected all app pages (index.html, pdf-stamper.html)
+- ✅ Added logout functionality
+- ✅ SHA-256 password hashing (no cleartext storage)
+- ✅ Shared authentication module (auth.js)
+- ✅ Comprehensive documentation (AUTH_README.md)
+
+### v1.0 - Initial Release
+- Basic PDF stamping functionality
+- Position presets and custom positioning
+- Opacity and scale controls
+- Page range support
+- Railway Engineering themed gateway page
+
+## 🤝 Contributing
 
 Contributions welcome! Please:
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/new-feature`)
 3. Make your changes
 4. Test in multiple browsers
-5. Submit a pull request
+5. Test authentication flow
+6. Update documentation
+7. Submit a pull request
 
-## License
+## 📄 License
 
 MIT License - see LICENSE file for details
 
-## Troubleshooting
-
-**PDF won't load**
-- Ensure the PDF is not password-protected or corrupted
-- Try a different PDF file
-- Check browser console for errors
-
-**Stamp appears in wrong position**
-- Coordinates are based on PDF dimensions, not screen pixels
-- Use the preview to verify positioning
-- Remember: Y-axis starts from top in preview, bottom in PDF coordinates
-
-**Downloaded PDF is corrupted**
-- Ensure both files loaded successfully (green checkmarks)
-- Try with a smaller/simpler PDF
-- Clear browser cache and try again
-
-**Performance issues**
-- Use smaller stamp images (resize before uploading)
-- Process fewer pages at once
-- Close other browser tabs to free memory
-
-## Credits
+## 🙏 Credits
 
 Built with:
 - [PDF.js](https://mozilla.github.io/pdf.js/) by Mozilla
 - [pdf-lib](https://pdf-lib.js.org/) by Andrew Dillon
+- Web Crypto API for secure hashing
 
-## Version History
+## 📞 Support
 
-- **v1.0** - Initial release
-  - Basic stamping functionality
-  - Position presets and custom positioning
-  - Opacity and scale controls
-  - Page range support
+For issues or questions:
+- Check [AUTH_README.md](AUTH_README.md) for authentication setup
+- Review troubleshooting section above
+- Check browser console for error messages
+- Ensure you're using a modern, supported browser
+
+---
+
+**Remember**: Change the default password (`railway123`) before deploying!

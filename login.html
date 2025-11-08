@@ -219,13 +219,58 @@
     </div>
 
     <script>
-        // Authentication configuration
+        /**
+         * Railway Engineering Utilities - Authentication System
+         *
+         * This login page provides password-based authentication for the app suite.
+         *
+         * SECURITY NOTICE:
+         * - This is CLIENT-SIDE authentication only
+         * - Suitable for basic access control, NOT for protecting sensitive data
+         * - Determined users can bypass by manipulating localStorage
+         * - For production apps with sensitive data, use SERVER-SIDE authentication
+         *
+         * HOW IT WORKS:
+         * 1. User enters password
+         * 2. Password is hashed using SHA-256 (Web Crypto API)
+         * 3. Hash is compared against pre-stored valid hashes
+         * 4. If match: Create session in localStorage with 24-hour expiry
+         * 5. Redirect to intended page (or index.html)
+         * 6. Session checked by auth.js on protected pages
+         *
+         * TO CHANGE PASSWORD:
+         * 1. Run in browser console: await hashPassword('your_new_password')
+         * 2. Copy the hash output
+         * 3. Add to validPasswords array below (line 277)
+         * 4. Remove old hash if replacing default password
+         *
+         * See AUTH_README.md for detailed instructions
+         */
+
+        // ============================================================================
+        // CONFIGURATION
+        // ============================================================================
+
         const AUTH_CONFIG = {
-            sessionKey: 'railwayAuthSession',
+            sessionKey: 'railwayAuthSession',    // localStorage key for session data
             sessionDuration: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
         };
 
-        // Simple SHA-256 hash function
+        // ============================================================================
+        // PASSWORD HASHING
+        // ============================================================================
+
+        /**
+         * Hash a password using SHA-256
+         * Uses Web Crypto API for secure hashing
+         *
+         * @param {string} password - The plaintext password to hash
+         * @returns {Promise<string>} - Hex string of the SHA-256 hash
+         *
+         * Example usage in browser console:
+         *   await hashPassword('myPassword123')
+         *   // Returns: '1a2b3c4d5e6f...' (64-character hex string)
+         */
         async function hashPassword(password) {
             const encoder = new TextEncoder();
             const data = encoder.encode(password);
@@ -235,7 +280,17 @@
             return hashHex;
         }
 
-        // Check if already authenticated
+        // ============================================================================
+        // SESSION MANAGEMENT
+        // ============================================================================
+
+        /**
+         * Check if user already has a valid session
+         * If yes, redirect them to the app (they don't need to login again)
+         * If session expired or invalid, clean it up
+         *
+         * @returns {boolean} - true if valid session exists, false otherwise
+         */
         function checkExistingSession() {
             const session = localStorage.getItem(AUTH_CONFIG.sessionKey);
             if (session) {
@@ -243,70 +298,112 @@
                     const sessionData = JSON.parse(session);
                     const now = new Date().getTime();
 
-                    // Check if session is still valid
+                    // Check if session is still valid (not expired)
                     if (sessionData.expiry && sessionData.expiry > now) {
-                        // Redirect to the page they were trying to access, or index
+                        // Valid session exists - redirect to app
+                        // If they came from a specific page, redirect there
+                        // Otherwise, default to index.html
                         const urlParams = new URLSearchParams(window.location.search);
                         const redirect = urlParams.get('redirect') || 'index.html';
                         window.location.href = redirect;
                         return true;
                     } else {
-                        // Session expired, remove it
+                        // Session expired - clean it up
                         localStorage.removeItem(AUTH_CONFIG.sessionKey);
                     }
                 } catch (e) {
+                    // Invalid session data - clean it up
                     localStorage.removeItem(AUTH_CONFIG.sessionKey);
                 }
             }
             return false;
         }
 
-        // Handle login form submission
+        // ============================================================================
+        // LOGIN FORM HANDLER
+        // ============================================================================
+
+        /**
+         * Handle login form submission
+         * Validates password and creates session if valid
+         */
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            e.preventDefault(); // Prevent form submission
 
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
 
-            // Hash the entered password
+            // Hash the entered password using SHA-256
             const hashedPassword = await hashPassword(password);
 
-            // Valid password hashes (SHA-256)
-            // To add a password: Use browser console to run hashPassword('your_password')
-            // and add the resulting hash to this array
+            // ========================================================================
+            // PASSWORD CONFIGURATION
+            // ========================================================================
+            // SECURITY: Only SHA-256 hashes are stored here, NOT plaintext passwords
+            //
+            // DEFAULT PASSWORD: railway123
+            // DEFAULT HASH:     7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb
+            //
+            // TO GENERATE NEW HASH:
+            //   Method 1 (Browser console):
+            //     await hashPassword('your_password')
+            //
+            //   Method 2 (Command line):
+            //     echo -n "your_password" | sha256sum | cut -d' ' -f1
+            //
+            // MULTIPLE PASSWORDS:
+            //   Add multiple hashes to support different users:
+            //   const validPasswords = [
+            //       'hash_for_admin',
+            //       'hash_for_user1',
+            //       'hash_for_user2'
+            //   ];
+            // ========================================================================
+
             const validPasswords = [
-                '7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb', // Default password
-                // Add more SHA-256 hashes here as needed
+                '7b1f63a3393616b63dcef714d01d5664bce8c9293c0f11c88cc190ec76e8f5cb', // Default: railway123
+                // Add more SHA-256 hashes below as needed (one per line)
             ];
 
+            // Check if entered password hash matches any valid hash
             if (validPasswords.includes(hashedPassword)) {
-                // Create session
+                // ✅ Password is valid - Create session
+
                 const sessionData = {
-                    authenticated: true,
-                    timestamp: new Date().getTime(),
-                    expiry: new Date().getTime() + AUTH_CONFIG.sessionDuration
+                    authenticated: true,                                        // Authentication flag
+                    timestamp: new Date().getTime(),                           // Login timestamp
+                    expiry: new Date().getTime() + AUTH_CONFIG.sessionDuration // Session expiry time
                 };
 
+                // Store session in localStorage (accessible across all tabs/windows)
                 localStorage.setItem(AUTH_CONFIG.sessionKey, JSON.stringify(sessionData));
 
                 // Redirect to the page they were trying to access
+                // URL format: login.html?redirect=pdf-stamper.html
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect') || 'index.html';
                 window.location.href = redirect;
-            } else {
-                // Show error
-                errorMessage.classList.add('show');
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
 
-                // Hide error after 3 seconds
+            } else {
+                // ❌ Password is invalid - Show error
+
+                errorMessage.classList.add('show');           // Display error message
+                document.getElementById('password').value = ''; // Clear password field
+                document.getElementById('password').focus();   // Focus back to input
+
+                // Auto-hide error message after 3 seconds
                 setTimeout(() => {
                     errorMessage.classList.remove('show');
                 }, 3000);
             }
         });
 
-        // Check for existing session on page load
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+
+        // On page load: Check if user already has valid session
+        // If yes, they'll be auto-redirected (no need to login again)
         checkExistingSession();
     </script>
 </body>
