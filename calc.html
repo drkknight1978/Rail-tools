@@ -11,13 +11,6 @@
 <body>
 <div class="container">
 	<h1>Voltage Drop Iterative Calculator</h1>
-    <div class="button-panel">
-	    <h1> Style Settings </h1>
-        <button onclick="changeStyle('classic_style.css')">Classic Style</button>
-        <button onclick="changeStyle('60s_style.css')">60's Style</button>
-        <button onclick="changeStyle('glass_and_crystals_style.css')">Glass & Crystals Style</button>
-        <button onclick="changeStyle('modern_style.css')">Modern Style</button>
-    </div>
 
     <label for="conductor">Select Conductor:</label>
     <select id="conductor">
@@ -79,11 +72,6 @@ function calculateVoltageDropIterative() {
     }
 
     document.getElementById("results").innerHTML = `Voltage at the load: ${V_load.toFixed(2)} V<br>Current drawn by the load: ${I_load.toFixed(2)} A<br>Iterations: ${iterations}`;
-}
-</script>
-<script>
-function changeStyle(sheet) {
-    document.getElementById('styleSheet').href = sheet;
 }
 </script>
 </body>
