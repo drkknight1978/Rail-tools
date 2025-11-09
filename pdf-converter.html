@@ -1079,22 +1079,44 @@
             canvas.height = processedData.height;
             canvas.getContext('2d').putImageData(processedData, 0, 0);
 
-            // Create PNG blob (saving as PNG for now)
-            const blob = await canvasToBlob(canvas);
+            // Create TIFF blob
+            const blob = await canvasToTIFF(canvas, targetDPI);
 
             const baseName = filename.substring(0, filename.lastIndexOf('.'));
             const suffix = (isPDF && convertPDF) ? '_300dpi_bin' : (despeckle ? '_despeckle' : '_processed');
-            const outputFilename = `${baseName}${suffix}.png`;
+            const outputFilename = `${baseName}${suffix}.tif`;
 
             return { blob: blob, filename: outputFilename };
         }
 
-        async function canvasToBlob(canvas) {
-            return new Promise((resolve) => {
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/png');
-            });
+        async function canvasToTIFF(canvas, dpi) {
+            // Get image data from canvas
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            // Create TIFF IFD (Image File Directory)
+            const ifd = {
+                t256: [canvas.width],           // ImageWidth
+                t257: [canvas.height],          // ImageLength
+                t258: [8, 8, 8, 8],            // BitsPerSample (RGBA)
+                t259: [1],                      // Compression (1 = no compression)
+                t262: [2],                      // PhotometricInterpretation (2 = RGB)
+                t273: undefined,                // StripOffsets (set by encoder)
+                t277: [4],                      // SamplesPerPixel (RGBA = 4)
+                t278: [canvas.height],          // RowsPerStrip
+                t279: undefined,                // StripByteCounts (set by encoder)
+                t282: [dpi],                    // XResolution
+                t283: [dpi],                    // YResolution
+                t284: [1],                      // PlanarConfiguration (1 = chunky)
+                t296: [2],                      // ResolutionUnit (2 = inches)
+                t338: [1]                       // ExtraSamples (1 = associated alpha)
+            };
+
+            // Encode TIFF
+            const tiffBuffer = UTIF.encodeImage(imageData.data.buffer, canvas.width, canvas.height, ifd);
+
+            // Create blob
+            return new Blob([tiffBuffer], { type: 'image/tiff' });
         }
 
         function downloadFile(blob, filename) {
