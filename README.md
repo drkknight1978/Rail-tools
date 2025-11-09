@@ -26,6 +26,15 @@ Add stamps and watermarks to PDF documents with precision control.
 - Adjustable scale (10-200%)
 - Apply to specific pages or page ranges
 - Real-time preview of changes
+- **Date Stamping**:
+  - Add date text to stamps
+  - Three position options: Middle (center of stamp), Top (above stamp), Bottom (below stamp)
+  - Date picker with default to today's date
+  - Customizable date color (defaults to blue)
+  - Adjustable font size (8-72px)
+  - Fine position adjustment (±1px)
+  - Rough position adjustment (±10px)
+  - British date format (DD/MM/YYYY)
 
 ### 2. Voltage Drop Calculator
 Calculate voltage drop in electrical systems with iterative precision. Essential for railway power distribution and signal circuits.
@@ -133,7 +142,15 @@ Change to desired duration:
    - Adjust opacity for transparency
    - Adjust scale to resize
    - Use zoom to preview better
-5. **Apply & Download**:
+5. **Add Date (Optional)**:
+   - Check "Add date to stamp" to enable date stamping
+   - Choose position: Middle (center of stamp), Top (above), or Bottom (below)
+   - Select date from calendar picker (defaults to today)
+   - Customize color using color picker (defaults to blue)
+   - Adjust font size with slider (8-72px)
+   - Fine-tune position with X/Y adjustment buttons (±1px or ±10px)
+   - Preview updates in real-time
+6. **Apply & Download**:
    - Choose pages (current, all, or range like "1-3, 5, 7-9")
    - Click "Process & Download"
    - Stamped PDF downloads automatically
@@ -325,6 +342,18 @@ To modify:
 - Ensure positive values for all inputs
 
 ## 📝 Version History
+
+### v2.2 - PDF Stamper Date Enhancement
+- ✅ Added date stamping functionality to PDF Stamper
+- ✅ Three position presets: Middle, Top, Bottom
+- ✅ Date picker with today's date as default
+- ✅ Customizable date color (defaults to blue)
+- ✅ Adjustable font size (8-72px slider)
+- ✅ Fine position adjustment controls (±1px)
+- ✅ Rough position adjustment controls (±10px)
+- ✅ British date format (DD/MM/YYYY)
+- ✅ Real-time preview of date text
+- ✅ Date text embedded in final PDF output
 
 ### v2.1 - Voltage Drop Calculator
 - ✅ Added Voltage Drop Calculator tool (calc.html)

@@ -5,6 +5,158 @@ All notable changes to Railway Engineering Utilities will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-11-09
+
+### Added - PDF Stamper Date Functionality
+
+#### Enhanced Files
+- **pdf-stamper.html** - Added comprehensive date stamping functionality
+  - New "Date Options" control group in UI
+  - Date text rendering in preview canvas
+  - Date text embedding in final PDF output
+  - Integration with existing stamp positioning system
+  - Real-time preview updates
+
+#### Features
+
+- **Date Stamping Controls**
+  - "Add date to stamp" checkbox to enable/disable date functionality
+  - All date controls disabled until checkbox is checked and files are loaded
+  - Seamless integration with existing PDF Stamper workflow
+
+- **Date Position Presets**
+  - **Middle**: Date centered in the middle of the stamp (Stamp_Width × 0.5, Stamp_Height × 0.5)
+  - **Top**: Date positioned above stamp with date_bottom = stamp_top, horizontally centered
+  - **Bottom**: Date positioned below stamp with stamp_bottom = date_top, horizontally centered
+  - Mutually exclusive radio button selection
+
+- **Date Customization**
+  - **Date Picker**: HTML5 date input with default value set to today's date
+  - **Color Picker**: Full color selection with default blue (#0000ff)
+  - **Font Size Slider**: Adjustable from 8px to 72px (default 24px)
+  - Real-time slider value display
+
+- **Precision Position Adjustment**
+  - **X-axis controls**: −10, −1, +1, +10 pixel adjustment buttons
+  - **Y-axis controls**: −10, −1, +10 pixel adjustment buttons
+  - Fine movement: ±1 pixel for precise positioning
+  - Rough movement: ±10 pixels for quick adjustments
+  - Real-time offset value display
+  - Offsets applied relative to selected position preset
+  - Separate rows for X and Y controls for better layout
+
+- **Date Formatting**
+  - British date format (DD/MM/YYYY) using 'en-GB' locale
+  - Automatically formats selected date for display
+  - Consistent formatting in both preview and PDF output
+
+- **Preview Integration**
+  - Date text rendered on preview canvas with proper positioning
+  - Font size scaled according to zoom factor
+  - Color applied from user selection
+  - Center-aligned text with middle baseline
+  - Offset adjustments visible in real-time
+
+- **PDF Generation**
+  - Date text embedded using pdf-lib drawText() method
+  - Hex color converted to RGB for PDF rendering
+  - Font size scaled proportionally with PDF dimensions
+  - Text width approximation for centering
+  - Y-axis coordinate inversion handling for PDF coordinate system
+  - Offset adjustments applied with proper scaling
+
+#### Technical Implementation
+
+- **State Management**
+  - `addDate`: Boolean flag for date feature toggle
+  - `datePosition`: String ('middle', 'top', 'bottom')
+  - `dateValue`: ISO date string (YYYY-MM-DD format)
+  - `dateColor`: Hex color string (default '#0000ff')
+  - `dateFontSize`: Integer (8-72, default 24)
+  - `dateOffsetX`: Integer offset in pixels (default 0)
+  - `dateOffsetY`: Integer offset in pixels (default 0)
+
+- **DOM Elements**
+  - 8 new radio buttons and checkboxes
+  - 12 new adjustment buttons (X/Y controls)
+  - 3 new input elements (date picker, color picker, font size slider)
+  - 2 new display spans for offset values
+
+- **Event Handlers**
+  - `handleAddDateChange()`: Toggle date feature on/off
+  - `handleDatePositionChange()`: Update position preset
+  - `handleDateInputChange()`: Update selected date
+  - `handleDateColorChange()`: Update text color
+  - `handleDateFontSizeChange()`: Update font size
+  - `adjustDateOffset()`: Handle position adjustment buttons
+
+- **Rendering Logic**
+  - Canvas date rendering in `updatePreview()` function
+  - PDF date rendering in `handleProcess()` function
+  - Zoom factor applied to font size and offsets in preview
+  - Scale factor applied to font size and offsets in PDF
+  - Y-axis inversion handling for PDF coordinates
+
+#### User Interface
+
+- **Layout**
+  - New "Date Options" section below "Stamp Controls"
+  - Vertically stacked radio buttons for position selection
+  - Horizontal button groups for X/Y adjustment
+  - Slider with real-time value display for font size
+  - Standard color picker input
+  - Date picker input with calendar popup
+
+- **Accessibility**
+  - All controls properly labeled
+  - Disabled state management based on feature enablement
+  - Visual feedback for current offset values
+  - Intuitive button layout with minus/plus symbols
+
+### Changed
+
+- **pdf-stamper.html** - UI Layout
+  - Added new control group between "Stamp Controls" and "Page Options"
+  - Updated control sections to accommodate date options
+  - Enhanced state management for new date-related properties
+
+### Testing
+
+Manual testing completed:
+- ✅ Date checkbox enables/disables all date controls
+- ✅ Position presets (Middle, Top, Bottom) work correctly
+- ✅ Date picker defaults to today's date
+- ✅ Color picker works with real-time preview
+- ✅ Font size slider updates preview dynamically
+- ✅ X/Y position adjustment buttons work correctly
+- ✅ Fine movement (±1px) provides precise control
+- ✅ Rough movement (±10px) allows quick positioning
+- ✅ Offset values display correctly
+- ✅ Preview shows date text in correct position
+- ✅ Final PDF embeds date text correctly
+- ✅ British date format (DD/MM/YYYY) displays properly
+- ✅ Zoom factor correctly scales date text in preview
+- ✅ Date text scales proportionally in PDF output
+- ✅ All controls disabled until PDF and stamp loaded
+- ✅ Date controls disabled until "Add date" checked
+
+### Known Limitations
+
+1. **Font Selection**: Only Arial font available (pdf-lib limitation)
+2. **Text Width**: Uses approximation for centering (no precise font metrics)
+3. **Date Format**: Fixed to British format (DD/MM/YYYY)
+4. **Single Date**: Only one date can be added per stamp
+5. **No Rotation**: Date text always horizontal
+6. **No Shadow/Outline**: Plain text only, no effects
+
+### Migration Notes
+
+For existing users upgrading from v2.1:
+1. **No Breaking Changes**: All existing PDF Stamper functionality preserved
+2. **Optional Feature**: Date stamping is opt-in via checkbox
+3. **Backward Compatible**: PDFs can be processed without dates as before
+4. **New Controls**: Date section appears below Stamp Controls
+
 ## [2.1.0] - 2025-11-08
 
 ### Added - Voltage Drop Calculator
