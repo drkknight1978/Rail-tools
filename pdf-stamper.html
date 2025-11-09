@@ -160,6 +160,52 @@
                     </div>
                 </div>
 
+                <!-- Date Controls -->
+                <div class="control-group">
+                    <h3>Date Options</h3>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="addDateCheck" disabled>
+                        <label for="addDateCheck">Add date to stamp</label>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Date Position:</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                            <div class="checkbox-group">
+                                <input type="radio" id="datePositionMiddle" name="datePosition" value="middle" checked disabled>
+                                <label for="datePositionMiddle">Middle (center of stamp)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="radio" id="datePositionTop" name="datePosition" value="top" disabled>
+                                <label for="datePositionTop">Top (above stamp)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="radio" id="datePositionBottom" name="datePosition" value="bottom" disabled>
+                                <label for="datePositionBottom">Bottom (below stamp)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Date:</label>
+                        <input type="date" id="dateInput" disabled>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Date Color:</label>
+                        <input type="color" id="dateColor" value="#0000ff" disabled>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Font Size:</label>
+                        <div class="slider-container">
+                            <input type="range" id="dateFontSizeSlider" min="8" max="72" value="24" disabled>
+                            <div class="slider-value" id="dateFontSizeValue">24px</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Page Range Controls -->
                 <div class="control-group">
                     <h3>Page Options</h3>
@@ -217,7 +263,13 @@
             dragStartStampPos: null,
             renderedPage: null,
             originalPageWidth: 0,
-            originalPageHeight: 0
+            originalPageHeight: 0,
+            // Date options
+            addDate: false,
+            datePosition: 'middle',
+            dateValue: new Date().toISOString().split('T')[0],
+            dateColor: '#0000ff',
+            dateFontSize: 24
         };
 
         // DOM elements
@@ -246,7 +298,16 @@
             allPagesCheck: document.getElementById('allPagesCheck'),
             pageRangeInput: document.getElementById('pageRangeInput'),
             batchModeCheck: document.getElementById('batchModeCheck'),
-            processBtn: document.getElementById('processBtn')
+            processBtn: document.getElementById('processBtn'),
+            // Date elements
+            addDateCheck: document.getElementById('addDateCheck'),
+            datePositionMiddle: document.getElementById('datePositionMiddle'),
+            datePositionTop: document.getElementById('datePositionTop'),
+            datePositionBottom: document.getElementById('datePositionBottom'),
+            dateInput: document.getElementById('dateInput'),
+            dateColor: document.getElementById('dateColor'),
+            dateFontSizeSlider: document.getElementById('dateFontSizeSlider'),
+            dateFontSizeValue: document.getElementById('dateFontSizeValue')
         };
 
         // Event Listeners - File Selection
@@ -271,6 +332,15 @@
         elements.scaleSlider.addEventListener('input', handleScaleChange);
         elements.allPagesCheck.addEventListener('change', updateUIState);
         elements.processBtn.addEventListener('click', handleProcess);
+
+        // Event Listeners - Date Controls
+        elements.addDateCheck.addEventListener('change', handleAddDateChange);
+        elements.datePositionMiddle.addEventListener('change', handleDatePositionChange);
+        elements.datePositionTop.addEventListener('change', handleDatePositionChange);
+        elements.datePositionBottom.addEventListener('change', handleDatePositionChange);
+        elements.dateInput.addEventListener('change', handleDateInputChange);
+        elements.dateColor.addEventListener('input', handleDateColorChange);
+        elements.dateFontSizeSlider.addEventListener('input', handleDateFontSizeChange);
 
         // Event Listeners - Canvas Dragging
         elements.previewCanvas.addEventListener('mousedown', handleMouseDown);
@@ -424,7 +494,7 @@
             if (state.stampImage && state.originalStampSize) {
                 const scaledStampWidth = state.originalStampSize.width * state.stampScale;
                 const scaledStampHeight = state.originalStampSize.height * state.stampScale;
-                
+
                 const zoomedX = state.stampPosition.x * state.zoomFactor;
                 const zoomedY = state.stampPosition.y * state.zoomFactor;
                 const zoomedStampWidth = scaledStampWidth * state.zoomFactor;
@@ -447,6 +517,34 @@
                     zoomedStampHeight
                 );
                 ctx.globalAlpha = 1.0;
+
+                // Draw date if enabled
+                if (state.addDate && state.dateValue) {
+                    const fontSize = state.dateFontSize * state.zoomFactor;
+                    ctx.font = `${fontSize}px Arial`;
+                    ctx.fillStyle = state.dateColor;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    const dateText = new Date(state.dateValue).toLocaleDateString();
+                    let dateX, dateY;
+
+                    if (state.datePosition === 'middle') {
+                        // Center of stamp
+                        dateX = zoomedX + (zoomedStampWidth * 0.5);
+                        dateY = zoomedY + (zoomedStampHeight * 0.5);
+                    } else if (state.datePosition === 'top') {
+                        // Above stamp, centered
+                        dateX = zoomedX + (zoomedStampWidth * 0.5);
+                        dateY = zoomedY - (fontSize * 0.6);
+                    } else if (state.datePosition === 'bottom') {
+                        // Below stamp, centered
+                        dateX = zoomedX + (zoomedStampWidth * 0.5);
+                        dateY = zoomedY + zoomedStampHeight + (fontSize * 0.6);
+                    }
+
+                    ctx.fillText(dateText, dateX, dateY);
+                }
             } else {
                 if (!state.stampImage) {
                     console.log('No stamp image loaded');
@@ -559,6 +657,34 @@
             state.stampScale = e.target.value / 100;
             elements.scaleValue.textContent = `${e.target.value}%`;
             handlePositionPresetChange();
+        }
+
+        // Date Control Handlers
+        function handleAddDateChange(e) {
+            state.addDate = e.target.checked;
+            updateUIState();
+            updatePreview();
+        }
+
+        function handleDatePositionChange(e) {
+            state.datePosition = e.target.value;
+            updatePreview();
+        }
+
+        function handleDateInputChange(e) {
+            state.dateValue = e.target.value;
+            updatePreview();
+        }
+
+        function handleDateColorChange(e) {
+            state.dateColor = e.target.value;
+            updatePreview();
+        }
+
+        function handleDateFontSizeChange(e) {
+            state.dateFontSize = parseInt(e.target.value);
+            elements.dateFontSizeValue.textContent = `${e.target.value}px`;
+            updatePreview();
         }
 
         // Mouse Dragging
@@ -697,6 +823,50 @@
                         height: height,
                         opacity: state.opacity
                     });
+
+                    // Draw date text if enabled
+                    if (state.addDate && state.dateValue) {
+                        const dateText = new Date(state.dateValue).toLocaleDateString();
+                        const fontSize = state.dateFontSize * scaleX;
+
+                        // Convert hex color to RGB
+                        const hexToRgb = (hex) => {
+                            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                            return result ? {
+                                r: parseInt(result[1], 16) / 255,
+                                g: parseInt(result[2], 16) / 255,
+                                b: parseInt(result[3], 16) / 255
+                            } : { r: 0, g: 0, b: 1 };
+                        };
+
+                        const rgb = hexToRgb(state.dateColor);
+
+                        // Measure text width for centering
+                        const textWidth = (dateText.length * fontSize) / 2; // Approximate
+
+                        let dateX, dateY;
+
+                        if (state.datePosition === 'middle') {
+                            // Center of stamp
+                            dateX = x + (width * 0.5) - (textWidth / 2);
+                            dateY = pdfHeight - (state.stampPosition.y * scaleY) - (scaledHeight * scaleY * 0.5) - (fontSize * 0.3);
+                        } else if (state.datePosition === 'top') {
+                            // Above stamp
+                            dateX = x + (width * 0.5) - (textWidth / 2);
+                            dateY = pdfHeight - (state.stampPosition.y * scaleY) + fontSize;
+                        } else if (state.datePosition === 'bottom') {
+                            // Below stamp
+                            dateX = x + (width * 0.5) - (textWidth / 2);
+                            dateY = pdfHeight - (state.stampPosition.y * scaleY) - (scaledHeight * scaleY) - fontSize;
+                        }
+
+                        page.drawText(dateText, {
+                            x: dateX,
+                            y: dateY,
+                            size: fontSize,
+                            color: PDFLib.rgb(rgb.r, rgb.g, rgb.b)
+                        });
+                    }
                 }
 
                 // Save and download
@@ -770,9 +940,20 @@
             elements.pageRangeInput.disabled = !ready || elements.allPagesCheck.checked;
             elements.batchModeCheck.disabled = !ready;
             elements.processBtn.disabled = !ready;
+
+            // Date controls
+            elements.addDateCheck.disabled = !ready;
+            const dateEnabled = ready && state.addDate;
+            elements.datePositionMiddle.disabled = !dateEnabled;
+            elements.datePositionTop.disabled = !dateEnabled;
+            elements.datePositionBottom.disabled = !dateEnabled;
+            elements.dateInput.disabled = !dateEnabled;
+            elements.dateColor.disabled = !dateEnabled;
+            elements.dateFontSizeSlider.disabled = !dateEnabled;
         }
 
         // Initialize
+        elements.dateInput.value = state.dateValue;
         updateUIState();
     </script>
 </body>
