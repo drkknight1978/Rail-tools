@@ -204,6 +204,28 @@
                             <div class="slider-value" id="dateFontSizeValue">24px</div>
                         </div>
                     </div>
+
+                    <div class="control-item">
+                        <label>Date Position Adjustment:</label>
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; margin-top: 8px;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="margin: 0; min-width: 15px;">X:</label>
+                                <button class="btn zoom-btn" id="dateXMinus10" disabled>−10</button>
+                                <button class="btn zoom-btn" id="dateXMinus1" disabled>−1</button>
+                                <span style="min-width: 40px; text-align: center; color: #c9b896;" id="dateOffsetXValue">0</span>
+                                <button class="btn zoom-btn" id="dateXPlus1" disabled>+1</button>
+                                <button class="btn zoom-btn" id="dateXPlus10" disabled>+10</button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="margin: 0; min-width: 15px;">Y:</label>
+                                <button class="btn zoom-btn" id="dateYMinus10" disabled>−10</button>
+                                <button class="btn zoom-btn" id="dateYMinus1" disabled>−1</button>
+                                <span style="min-width: 40px; text-align: center; color: #c9b896;" id="dateOffsetYValue">0</span>
+                                <button class="btn zoom-btn" id="dateYPlus1" disabled>+1</button>
+                                <button class="btn zoom-btn" id="dateYPlus10" disabled>+10</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Page Range Controls -->
@@ -269,7 +291,9 @@
             datePosition: 'middle',
             dateValue: new Date().toISOString().split('T')[0],
             dateColor: '#0000ff',
-            dateFontSize: 24
+            dateFontSize: 24,
+            dateOffsetX: 0,
+            dateOffsetY: 0
         };
 
         // DOM elements
@@ -307,7 +331,17 @@
             dateInput: document.getElementById('dateInput'),
             dateColor: document.getElementById('dateColor'),
             dateFontSizeSlider: document.getElementById('dateFontSizeSlider'),
-            dateFontSizeValue: document.getElementById('dateFontSizeValue')
+            dateFontSizeValue: document.getElementById('dateFontSizeValue'),
+            dateXMinus10: document.getElementById('dateXMinus10'),
+            dateXMinus1: document.getElementById('dateXMinus1'),
+            dateXPlus1: document.getElementById('dateXPlus1'),
+            dateXPlus10: document.getElementById('dateXPlus10'),
+            dateYMinus10: document.getElementById('dateYMinus10'),
+            dateYMinus1: document.getElementById('dateYMinus1'),
+            dateYPlus1: document.getElementById('dateYPlus1'),
+            dateYPlus10: document.getElementById('dateYPlus10'),
+            dateOffsetXValue: document.getElementById('dateOffsetXValue'),
+            dateOffsetYValue: document.getElementById('dateOffsetYValue')
         };
 
         // Event Listeners - File Selection
@@ -341,6 +375,14 @@
         elements.dateInput.addEventListener('change', handleDateInputChange);
         elements.dateColor.addEventListener('input', handleDateColorChange);
         elements.dateFontSizeSlider.addEventListener('input', handleDateFontSizeChange);
+        elements.dateXMinus10.addEventListener('click', () => adjustDateOffset('x', -10));
+        elements.dateXMinus1.addEventListener('click', () => adjustDateOffset('x', -1));
+        elements.dateXPlus1.addEventListener('click', () => adjustDateOffset('x', 1));
+        elements.dateXPlus10.addEventListener('click', () => adjustDateOffset('x', 10));
+        elements.dateYMinus10.addEventListener('click', () => adjustDateOffset('y', -10));
+        elements.dateYMinus1.addEventListener('click', () => adjustDateOffset('y', -1));
+        elements.dateYPlus1.addEventListener('click', () => adjustDateOffset('y', 1));
+        elements.dateYPlus10.addEventListener('click', () => adjustDateOffset('y', 10));
 
         // Event Listeners - Canvas Dragging
         elements.previewCanvas.addEventListener('mousedown', handleMouseDown);
@@ -543,6 +585,10 @@
                         dateY = zoomedY + zoomedStampHeight + (fontSize * 0.6);
                     }
 
+                    // Apply offset
+                    dateX += state.dateOffsetX * state.zoomFactor;
+                    dateY += state.dateOffsetY * state.zoomFactor;
+
                     ctx.fillText(dateText, dateX, dateY);
                 }
             } else {
@@ -684,6 +730,17 @@
         function handleDateFontSizeChange(e) {
             state.dateFontSize = parseInt(e.target.value);
             elements.dateFontSizeValue.textContent = `${e.target.value}px`;
+            updatePreview();
+        }
+
+        function adjustDateOffset(axis, delta) {
+            if (axis === 'x') {
+                state.dateOffsetX += delta;
+                elements.dateOffsetXValue.textContent = state.dateOffsetX;
+            } else if (axis === 'y') {
+                state.dateOffsetY += delta;
+                elements.dateOffsetYValue.textContent = state.dateOffsetY;
+            }
             updatePreview();
         }
 
@@ -860,6 +917,10 @@
                             dateY = pdfHeight - (state.stampPosition.y * scaleY) - (scaledHeight * scaleY) - fontSize;
                         }
 
+                        // Apply offset
+                        dateX += state.dateOffsetX * scaleX;
+                        dateY -= state.dateOffsetY * scaleY; // Y is inverted in PDF coordinates
+
                         page.drawText(dateText, {
                             x: dateX,
                             y: dateY,
@@ -950,6 +1011,14 @@
             elements.dateInput.disabled = !dateEnabled;
             elements.dateColor.disabled = !dateEnabled;
             elements.dateFontSizeSlider.disabled = !dateEnabled;
+            elements.dateXMinus10.disabled = !dateEnabled;
+            elements.dateXMinus1.disabled = !dateEnabled;
+            elements.dateXPlus1.disabled = !dateEnabled;
+            elements.dateXPlus10.disabled = !dateEnabled;
+            elements.dateYMinus10.disabled = !dateEnabled;
+            elements.dateYMinus1.disabled = !dateEnabled;
+            elements.dateYPlus1.disabled = !dateEnabled;
+            elements.dateYPlus10.disabled = !dateEnabled;
         }
 
         // Initialize
