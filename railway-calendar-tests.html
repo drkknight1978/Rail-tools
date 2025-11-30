@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Calendar API - Unit Tests</title>
+    <script src="auth.js"></script>
+    <script src="railway-calendar-api.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-magenta: #ff00ff;
+            --neon-green: #00ff00;
+            --neon-red: #ff0000;
+            --dark-bg: #0a0a0f;
+            --dark-panel: #151520;
+            --dark-card: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--dark-panel);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+        }
+
+        h1 {
+            font-size: 2em;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .controls {
+            background: var(--dark-panel);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            text-align: center;
+        }
+
+        .run-btn {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            color: var(--dark-bg);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .run-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .summary {
+            background: var(--dark-panel);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 191, 0, 0.2);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: var(--dark-card);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 0.85em;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .summary-value.pass {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .summary-value.fail {
+            color: var(--neon-red);
+            text-shadow: 0 0 10px var(--neon-red);
+        }
+
+        .test-results {
+            background: var(--dark-panel);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .test-suite {
+            margin-bottom: 30px;
+        }
+
+        .suite-title {
+            font-size: 1.3em;
+            color: var(--neon-cyan);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .test-case {
+            background: var(--dark-card);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .test-case.pass {
+            border-left-color: var(--neon-green);
+        }
+
+        .test-case.fail {
+            border-left-color: var(--neon-red);
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-status {
+            font-size: 0.9em;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .test-status.pass {
+            background: rgba(0, 255, 0, 0.2);
+            color: var(--neon-green);
+        }
+
+        .test-status.fail {
+            background: rgba(255, 0, 0, 0.2);
+            color: var(--neon-red);
+        }
+
+        .test-details {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .test-error {
+            color: var(--neon-red);
+            margin-top: 5px;
+            padding: 10px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: var(--dark-card);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="railway-calendar.html" class="back-link">← Back to Calendar</a>
+            <h1>Railway Calendar API - Unit Tests</h1>
+            <p style="color: #a0a0a0; margin-top: 10px;">Comprehensive test suite for edge cases and validation</p>
+        </div>
+
+        <div class="controls">
+            <button class="run-btn" onclick="runAllTests()">Run All Tests</button>
+        </div>
+
+        <div class="summary" id="summary" style="display: none;">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Total Tests</div>
+                    <div class="summary-value" id="totalTests">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Passed</div>
+                    <div class="summary-value pass" id="passedTests">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Failed</div>
+                    <div class="summary-value fail" id="failedTests">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Success Rate</div>
+                    <div class="summary-value" id="successRate">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-results" id="testResults"></div>
+    </div>
+
+    <script>
+        // Test Framework
+        class TestSuite {
+            constructor(name) {
+                this.name = name;
+                this.tests = [];
+            }
+
+            test(name, fn) {
+                this.tests.push({ name, fn });
+            }
+
+            async run() {
+                const results = [];
+                for (const test of this.tests) {
+                    try {
+                        await test.fn();
+                        results.push({
+                            name: test.name,
+                            passed: true,
+                            details: null,
+                            error: null
+                        });
+                    } catch (error) {
+                        results.push({
+                            name: test.name,
+                            passed: false,
+                            details: null,
+                            error: error.message
+                        });
+                    }
+                }
+                return results;
+            }
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(`${message || 'Assertion failed'}: expected ${expected}, got ${actual}`);
+            }
+        }
+
+        function assertDateEquals(actual, expected, message) {
+            const actualStr = actual.toISOString().split('T')[0];
+            const expectedStr = expected.toISOString().split('T')[0];
+            if (actualStr !== expectedStr) {
+                throw new Error(`${message || 'Date assertion failed'}: expected ${expectedStr}, got ${actualStr}`);
+            }
+        }
+
+        // Test Suites
+        function createTestSuites() {
+            const suites = [];
+
+            // Test Suite 1: Railway Year Start/End
+            const yearSuite = new TestSuite('Railway Year Boundaries');
+
+            yearSuite.test('Railway year starts on April 1st', () => {
+                const date = new Date(2024, 5, 15); // June 15, 2024
+                const yearStart = RailwayCalendarAPI.getRailwayYearStart(date);
+                assertDateEquals(yearStart, new Date(2024, 3, 1), 'Year should start April 1, 2024');
+            });
+
+            yearSuite.test('Railway year for date before April 1st', () => {
+                const date = new Date(2024, 2, 15); // March 15, 2024
+                const yearStart = RailwayCalendarAPI.getRailwayYearStart(date);
+                assertDateEquals(yearStart, new Date(2023, 3, 1), 'Year should start April 1, 2023');
+            });
+
+            yearSuite.test('Railway year ends on March 31st', () => {
+                const yearStart = new Date(2024, 3, 1);
+                const yearEnd = RailwayCalendarAPI.getRailwayYearEnd(yearStart);
+                assertDateEquals(yearEnd, new Date(2025, 2, 31), 'Year should end March 31, 2025');
+            });
+
+            suites.push(yearSuite);
+
+            // Test Suite 2: Week 1 Calculation
+            const week1Suite = new TestSuite('Week 1 Start Calculation');
+
+            week1Suite.test('Week 1 when April 1st is Saturday', () => {
+                // 2023: April 1 is Saturday
+                const week1 = RailwayCalendarAPI.getWeek1Start(2023);
+                assertDateEquals(week1, new Date(2023, 3, 1), 'Week 1 should start April 1');
+                assertEquals(week1.getDay(), 6, 'Should be Saturday');
+            });
+
+            week1Suite.test('Week 1 when April 1st is Sunday', () => {
+                // 2029: April 1 is Sunday
+                const week1 = RailwayCalendarAPI.getWeek1Start(2029);
+                assertEquals(week1.getDay(), 6, 'Should be Saturday');
+                assert(week1 >= new Date(2029, 3, 1), 'Should be on or after April 1');
+            });
+
+            week1Suite.test('Week 1 when April 1st is Friday', () => {
+                // 2022: April 1 is Friday
+                const week1 = RailwayCalendarAPI.getWeek1Start(2022);
+                assertDateEquals(week1, new Date(2022, 3, 2), 'Week 1 should start April 2 (Saturday)');
+                assertEquals(week1.getDay(), 6, 'Should be Saturday');
+            });
+
+            week1Suite.test('Week 1 when April 1st is Monday', () => {
+                // 2024: April 1 is Monday
+                const week1 = RailwayCalendarAPI.getWeek1Start(2024);
+                assertDateEquals(week1, new Date(2024, 3, 6), 'Week 1 should start April 6 (Saturday)');
+                assertEquals(week1.getDay(), 6, 'Should be Saturday');
+            });
+
+            suites.push(week1Suite);
+
+            // Test Suite 3: Week Number Calculation
+            const weekNumSuite = new TestSuite('Week Number Calculation');
+
+            weekNumSuite.test('First day of Week 1', () => {
+                const date = new Date(2024, 3, 6); // April 6, 2024 (Saturday, Week 1)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.week, 1, 'Should be week 1');
+                assertEquals(info.railwayYear, 2024, 'Should be railway year 2024');
+            });
+
+            weekNumSuite.test('Last day of Week 1', () => {
+                const date = new Date(2024, 3, 12); // April 12, 2024 (Friday)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.week, 1, 'Should be week 1');
+            });
+
+            weekNumSuite.test('First day of Week 2', () => {
+                const date = new Date(2024, 3, 13); // April 13, 2024 (Saturday)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.week, 2, 'Should be week 2');
+            });
+
+            weekNumSuite.test('Mid-year week number', () => {
+                const date = new Date(2024, 9, 5); // October 5, 2024
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assert(info.week >= 20 && info.week <= 30, 'Should be in mid-range weeks');
+                assertEquals(info.railwayYear, 2024, 'Should be railway year 2024');
+            });
+
+            weekNumSuite.test('End of railway year', () => {
+                const date = new Date(2025, 2, 30); // March 30, 2025
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assert(info.week >= 51, 'Should be in final weeks');
+                assertEquals(info.railwayYear, 2024, 'Should still be railway year 2024');
+            });
+
+            suites.push(weekNumSuite);
+
+            // Test Suite 4: Day of Week Calculation
+            const dayOfWeekSuite = new TestSuite('Day of Week Calculation');
+
+            dayOfWeekSuite.test('Saturday is day 0', () => {
+                const date = new Date(2024, 3, 6); // April 6, 2024 (Saturday)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.dayOfWeek, 0, 'Saturday should be day 0');
+            });
+
+            dayOfWeekSuite.test('Friday is day 6', () => {
+                const date = new Date(2024, 3, 12); // April 12, 2024 (Friday)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.dayOfWeek, 6, 'Friday should be day 6');
+            });
+
+            dayOfWeekSuite.test('Wednesday is day 4', () => {
+                const date = new Date(2024, 3, 10); // April 10, 2024 (Wednesday)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.dayOfWeek, 4, 'Wednesday should be day 4');
+            });
+
+            suites.push(dayOfWeekSuite);
+
+            // Test Suite 5: Period Calculation
+            const periodSuite = new TestSuite('Period Calculation');
+
+            periodSuite.test('Week 1 is Period 1', () => {
+                const date = new Date(2024, 3, 6);
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.period, 1, 'Week 1 should be Period 1');
+            });
+
+            periodSuite.test('Week 4 is Period 1', () => {
+                const date = new Date(2024, 3, 27); // Week 4
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.period, 1, 'Week 4 should be Period 1');
+            });
+
+            periodSuite.test('Week 5 is Period 2', () => {
+                const date = new Date(2024, 4, 4); // Week 5
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.period, 2, 'Week 5 should be Period 2');
+            });
+
+            periodSuite.test('Week 8 is Period 2', () => {
+                const date = new Date(2024, 4, 25); // Week 8
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.period, 2, 'Week 8 should be Period 2');
+            });
+
+            periodSuite.test('Week 13 is Period 4', () => {
+                const date = new Date(2024, 6, 6); // Week 13
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assertEquals(info.period, 4, 'Week 13 should be Period 4');
+            });
+
+            suites.push(periodSuite);
+
+            // Test Suite 6: 53-Week Years
+            const week53Suite = new TestSuite('53-Week Year Handling');
+
+            week53Suite.test('Identify years with 52 or 53 weeks', () => {
+                const weeks2024 = RailwayCalendarAPI.getWeeksInRailwayYear(2024);
+                assert(weeks2024 === 52 || weeks2024 === 53, 'Should have 52 or 53 weeks');
+            });
+
+            week53Suite.test('Week count is consistent', () => {
+                const year = 2024;
+                const totalWeeks = RailwayCalendarAPI.getWeeksInRailwayYear(year);
+                const lastWeekEnd = RailwayCalendarAPI.getWeekStartEnd(year, totalWeeks).end;
+                const nextYearStart = RailwayCalendarAPI.getRailwayYearStart(new Date(year + 1, 3, 1));
+
+                assert(lastWeekEnd < nextYearStart, 'Last week should end before next railway year');
+            });
+
+            suites.push(week53Suite);
+
+            // Test Suite 7: Week Start/End Dates
+            const weekDatesSuite = new TestSuite('Week Start/End Dates');
+
+            weekDatesSuite.test('Week starts on Saturday', () => {
+                const dates = RailwayCalendarAPI.getWeekStartEnd(2024, 5);
+                assertEquals(dates.start.getDay(), 6, 'Week should start on Saturday');
+            });
+
+            weekDatesSuite.test('Week ends on Friday', () => {
+                const dates = RailwayCalendarAPI.getWeekStartEnd(2024, 5);
+                assertEquals(dates.end.getDay(), 5, 'Week should end on Friday');
+            });
+
+            weekDatesSuite.test('Week is 7 days long', () => {
+                const dates = RailwayCalendarAPI.getWeekStartEnd(2024, 5);
+                const days = Math.round((dates.end - dates.start) / (1000 * 60 * 60 * 24));
+                assertEquals(days, 6, 'Week span should be 6 days (inclusive of start and end)');
+            });
+
+            suites.push(weekDatesSuite);
+
+            // Test Suite 8: Date to Railway Calendar Conversion
+            const conversionSuite = new TestSuite('Date Conversion');
+
+            conversionSuite.test('Convert date to railway calendar', () => {
+                const date = new Date(2024, 6, 15); // July 15, 2024
+                const railCal = RailwayCalendarAPI.dateToRailwayCalendar(date);
+
+                assert(railCal.railwayYear === 2024, 'Should be railway year 2024');
+                assert(railCal.week > 0, 'Should have valid week number');
+                assert(railCal.period > 0, 'Should have valid period number');
+                assert(railCal.dayOfWeek >= 0 && railCal.dayOfWeek <= 6, 'Day of week should be 0-6');
+                assert(railCal.formattedString.length > 0, 'Should have formatted string');
+            });
+
+            suites.push(conversionSuite);
+
+            // Test Suite 9: Bank Holidays
+            const holidaySuite = new TestSuite('Bank Holiday Detection');
+
+            holidaySuite.test('Detect Christmas Day 2024', () => {
+                const date = new Date(2024, 11, 25);
+                const holiday = RailwayCalendarAPI.getBankHoliday(date);
+                assertEquals(holiday, 'Christmas Day', 'Should detect Christmas Day');
+            });
+
+            holidaySuite.test('Non-holiday returns null', () => {
+                const date = new Date(2024, 6, 15); // Random day
+                const holiday = RailwayCalendarAPI.getBankHoliday(date);
+                assertEquals(holiday, null, 'Non-holiday should return null');
+            });
+
+            holidaySuite.test('Get all holidays in railway year', () => {
+                const holidays = RailwayCalendarAPI.getBankHolidaysInRailwayYear(2024);
+                assert(holidays.length > 0, 'Should have holidays');
+                assert(holidays.every(h => h.date && h.name && h.railInfo), 'Each holiday should have required fields');
+            });
+
+            suites.push(holidaySuite);
+
+            // Test Suite 10: Edge Cases
+            const edgeSuite = new TestSuite('Edge Cases');
+
+            edgeSuite.test('Handle leap year', () => {
+                const date = new Date(2024, 1, 29); // Feb 29, 2024 (leap day)
+                const info = RailwayCalendarAPI.getRailwayWeekInfo(date);
+                assert(info.railwayYear === 2023, 'Feb 2024 is in railway year 2023');
+                assert(info.week > 0, 'Should have valid week number');
+            });
+
+            edgeSuite.test('Handle year boundary', () => {
+                const dec31 = new Date(2024, 11, 31);
+                const jan1 = new Date(2025, 0, 1);
+
+                const infoEnd = RailwayCalendarAPI.getRailwayWeekInfo(dec31);
+                const infoStart = RailwayCalendarAPI.getRailwayWeekInfo(jan1);
+
+                // Both should be in railway year 2024 (which ends March 31, 2025)
+                assertEquals(infoEnd.railwayYear, 2024, 'Dec 31 should be in railway year 2024');
+                assertEquals(infoStart.railwayYear, 2024, 'Jan 1 should be in railway year 2024');
+            });
+
+            edgeSuite.test('Handle dates in different centuries', () => {
+                const date2000 = new Date(2000, 5, 15);
+                const info2000 = RailwayCalendarAPI.getRailwayWeekInfo(date2000);
+                assert(info2000.week > 0, 'Should handle year 2000');
+
+                const date2050 = new Date(2050, 5, 15);
+                const info2050 = RailwayCalendarAPI.getRailwayWeekInfo(date2050);
+                assert(info2050.week > 0, 'Should handle year 2050');
+            });
+
+            suites.push(edgeSuite);
+
+            return suites;
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('testResults');
+            const summaryDiv = document.getElementById('summary');
+            const progressBar = document.getElementById('progressBar');
+
+            resultsDiv.innerHTML = '';
+            summaryDiv.style.display = 'block';
+
+            const suites = createTestSuites();
+            let totalTests = 0;
+            let passedTests = 0;
+            let failedTests = 0;
+
+            for (let i = 0; i < suites.length; i++) {
+                const suite = suites[i];
+                const results = await suite.run();
+
+                // Update progress
+                const progress = ((i + 1) / suites.length) * 100;
+                progressBar.style.width = progress + '%';
+
+                // Create suite element
+                const suiteDiv = document.createElement('div');
+                suiteDiv.className = 'test-suite';
+
+                const suiteTitle = document.createElement('div');
+                suiteTitle.className = 'suite-title';
+                suiteTitle.textContent = suite.name;
+                suiteDiv.appendChild(suiteTitle);
+
+                // Add test results
+                results.forEach(result => {
+                    totalTests++;
+                    if (result.passed) {
+                        passedTests++;
+                    } else {
+                        failedTests++;
+                    }
+
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'test-case ' + (result.passed ? 'pass' : 'fail');
+
+                    const testName = document.createElement('div');
+                    testName.className = 'test-name';
+
+                    const status = document.createElement('span');
+                    status.className = 'test-status ' + (result.passed ? 'pass' : 'fail');
+                    status.textContent = result.passed ? 'PASS' : 'FAIL';
+
+                    testName.appendChild(status);
+                    testName.appendChild(document.createTextNode(result.name));
+                    testDiv.appendChild(testName);
+
+                    if (result.error) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'test-error';
+                        errorDiv.textContent = result.error;
+                        testDiv.appendChild(errorDiv);
+                    }
+
+                    suiteDiv.appendChild(testDiv);
+                });
+
+                resultsDiv.appendChild(suiteDiv);
+            }
+
+            // Update summary
+            document.getElementById('totalTests').textContent = totalTests;
+            document.getElementById('passedTests').textContent = passedTests;
+            document.getElementById('failedTests').textContent = failedTests;
+
+            const successRate = totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0;
+            const successRateElem = document.getElementById('successRate');
+            successRateElem.textContent = successRate + '%';
+            successRateElem.className = 'summary-value ' + (successRate === 100 ? 'pass' : 'fail');
+        }
+    </script>
+</body>
+</html>
